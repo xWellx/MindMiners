@@ -12,7 +12,7 @@
             <input class="form-control-file" name="files" type="file" value="" />
         </div>
         <div class="form-group">
-            <input class="form-control" required type="text" placeholder="offset" name="offset" />
+            <input class="form-control" required type="number" placeholder="offset" name="offset" />
         </div>
         <div class="form-group">
             <div class="flex-column">
@@ -27,7 +27,7 @@
 
     </form>
     @{
-        Html.RenderPartial("partial/errormessage");
+       await Html.RenderPartialAsync("partial/errormessage");
     }
 </div>
 
