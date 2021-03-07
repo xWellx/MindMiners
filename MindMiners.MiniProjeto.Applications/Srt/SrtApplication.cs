@@ -1,4 +1,6 @@
-﻿using MindMiners.MiniProjeto.Domains.Entity;
+﻿using MindMiners.MiniProjeto.Applications.Exceptions;
+using MindMiners.MiniProjeto.Domains.Entity;
+using MindMiners.MiniProjeto.Domains.Exceptions;
 using MindMiners.MiniProjeto.Domains.Srt;
 using System;
 using System.Collections.Generic;
@@ -20,8 +22,16 @@ namespace MindMiners.MiniProjeto.Applications.Srt
         public async Task<byte[]> CreateSrtFileWithOffsetAsync(byte[] srtFile, double offset)
         {
             string srtTextFromFile = Encoding.UTF8.GetString(srtFile);
+            IReadOnlyList<SrtBlockEntity> srtBlockEntities;
+            try
+            {
+                srtBlockEntities = await _srtDomain.ConvertSrtToListEntityAsync(srtTextFromFile);
+            }
+            catch (CustomException e)
+            {
+                throw new BadRequestException(e.Message, e);
+            }
 
-            IReadOnlyList<SrtBlockEntity> srtBlockEntities = await _srtDomain.ConvertSrtToListEntityAsync(srtTextFromFile);
 
             IReadOnlyList<SrtBlockEntity> srtBlockEntitiesWithOffSet = _srtDomain.IncludeOffsetOnSrtBlock(srtBlockEntities, offset);
 
