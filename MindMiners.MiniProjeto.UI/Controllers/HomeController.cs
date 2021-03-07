@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using MindMiners.MiniProjeto.Applications.Exceptions;
 using MindMiners.MiniProjeto.Applications.Srt;
 using MindMiners.MiniProjeto.UI.Models;
 using System;
@@ -97,14 +98,22 @@ namespace MindMiners.MiniProjeto.UI.Controllers
 
                         byte[] fileBytes = memoryStream.ToArray();
 
-                        byte[] bystesFileWithOffset = await _srtApplication
-                            .CreateSrtFileWithOffsetAsync(fileBytes, sendsubModel.Offset);
+                        try
+                        {
+                            byte[] bystesFileWithOffset = await _srtApplication
+                                .CreateSrtFileWithOffsetAsync(fileBytes, sendsubModel.Offset);
 
-                        AddFileToCache(bystesFileWithOffset);
+                            AddFileToCache(bystesFileWithOffset);
 
-                        return File(bystesFileWithOffset,
-                                    "application/srt",
-                                    $"{Guid.NewGuid().ToString("N")}.srt");
+                            return File(bystesFileWithOffset,
+                                        "application/srt",
+                                        $"{Guid.NewGuid().ToString("N")}.srt");
+                        }
+                        catch (BadRequestException e)
+                        {
+                            ViewBag.Error = e.Message;
+                            return View("index");
+                        }
                     }
                 }
             }
