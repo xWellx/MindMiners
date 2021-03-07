@@ -1,0 +1,60 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="col-6 offset-3">
+    <div class="form-text">
+        SubRip subtitules Adjuster
+    </div>
+
+    <form id="frmfiles" asp-action="sendsub" asp-controller="home" enctype="multipart/form-data">
+        <div class="form-group">
+            <input class="form-control-file" name="files" type="file" value="" />
+        </div>
+        <div class="form-group">
+            <input class="form-control" required type="text" placeholder="offset" name="offset" />
+        </div>
+        <div class="form-group">
+            <div class="flex-column">
+                <div class="col-6">
+                    <input type="submit" value="submit" />
+                </div>
+                <div class="col-6">
+                    <a asp-controller="home" asp-action="history">Open history</a>
+                </div>
+            </div>
+        </div>
+
+    </form>
+    @{
+        Html.RenderPartial("partial/errormessage");
+    }
+</div>
+
+
+
+<script>
+
+    async function submit(form) {
+        debugger;
+        var result = form.elements.namedItem("result");
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                window.location.href = '/';
+            }
+
+            result.value = 'Result: ' + response.status + ' ' +
+                response.statusText;
+
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+</script>

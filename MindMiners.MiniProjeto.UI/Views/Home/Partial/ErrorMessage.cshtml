@@ -1,0 +1,15 @@
+﻿
+
+
+@if (ViewBag.Error != null)
+{
+    <div id="errorMessage" class="form-group" style="color:red">
+        @ViewBag.Error
+    </div>
+    <script>
+            setTimeout(() => {
+                debugger;
+                document.getElementById("errorMessage").style = "display:none";
+            }, 5000);
+    </script>
+}
