@@ -120,7 +120,7 @@ namespace MindMiners.MiniProjeto.Domains.Srt
         {
             string dateSrtToString(DateTime dateTime)
             {
-                return dateTime.ToString("hh:mm:ss,fff");
+                return dateTime.ToString("HH:mm:ss,fff");
             }
 
             StringBuilder stringBuilder = new StringBuilder();
