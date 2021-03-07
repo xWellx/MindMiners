@@ -15,7 +15,8 @@ namespace MindMiners.MiniProjeto.Tests
 {
     public class SrtDomainTest
     {
-        ISrtDomain srtDomain;
+        ISrtDomain _srtDomain;
+        Fixture _fixture;
 
         [SetUp]
         public void Setup()
@@ -23,7 +24,9 @@ namespace MindMiners.MiniProjeto.Tests
             IServiceCollection serviceCollection = new ServiceCollection();
             DomainStartup.Startup(serviceCollection);
             var serviceBuild = serviceCollection.BuildServiceProvider();
-            srtDomain = serviceBuild.GetService<ISrtDomain>();
+            _srtDomain = serviceBuild.GetService<ISrtDomain>();
+
+            _fixture = new Fixture();
         }
 
         [Test]
@@ -33,7 +36,7 @@ namespace MindMiners.MiniProjeto.Tests
 - Made him an offer he couldn't refuse.")]
         public void ConvertSrtBlockTextWithErrorIndexInvalid(string srtBlockText)
         {
-            var exception = Assert.ThrowsAsync<CustomException>(() => srtDomain.ConvertSrtBlockToEntityAsync(srtBlockText));
+            var exception = Assert.ThrowsAsync<CustomException>(() => _srtDomain.ConvertSrtBlockToEntityAsync(srtBlockText));
 
             Assert.AreEqual("Falha ao converter o indice da SRT", exception.Message);
         }
@@ -46,7 +49,7 @@ namespace MindMiners.MiniProjeto.Tests
 - Made him an offer he couldn't refuse.")]
         public void ConvertSrtBlockTextWithErrorSeparatorNotExist(string srtBlockText)
         {
-            var exception = Assert.ThrowsAsync<CustomException>(() => srtDomain.ConvertSrtBlockToEntityAsync(srtBlockText));
+            var exception = Assert.ThrowsAsync<CustomException>(() => _srtDomain.ConvertSrtBlockToEntityAsync(srtBlockText));
 
             Assert.AreEqual("Separador de datas não existe", exception.Message);
         }
@@ -58,7 +61,7 @@ namespace MindMiners.MiniProjeto.Tests
 - Made him an offer he couldn't refuse.")]
         public void ConvertSrtBlockTextWithErrorDateNotFound(string srtBlockText)
         {
-            var exception = Assert.ThrowsAsync<CustomException>(() => srtDomain.ConvertSrtBlockToEntityAsync(srtBlockText));
+            var exception = Assert.ThrowsAsync<CustomException>(() => _srtDomain.ConvertSrtBlockToEntityAsync(srtBlockText));
 
             Assert.AreEqual("Não foram encontradas datas suficientes", exception.Message);
         }
@@ -70,7 +73,7 @@ namespace MindMiners.MiniProjeto.Tests
 - Made him an offer he couldn't refuse.")]
         public async Task ConvertSrtBlockTextWithValid(string srtBlockText)
         {
-            var result = await srtDomain.ConvertSrtBlockToEntityAsync(srtBlockText);
+            var result = await _srtDomain.ConvertSrtBlockToEntityAsync(srtBlockText);
 
             Assert.NotZero(result.Index);
             Assert.IsNotEmpty(result.Text);
@@ -115,10 +118,11 @@ in a savings account or I purchase a
 certificate of deposit, the bank just")]
         public async Task ConvertSrtTextWithValid(string srtBlockText)
         {
-            var result = await srtDomain.ConvertSrtToListEntityAsync(srtBlockText);
+            var result = await _srtDomain.ConvertSrtToListEntityAsync(srtBlockText);
 
             Assert.AreEqual(result.Count, 7);
         }
+
 
 
         [Test]
@@ -129,7 +133,7 @@ certificate of deposit, the bank just")]
             List<SrtBlockEntity> srtBlockEntities = fixture.CreateMany<SrtBlockEntity>().ToList();
             double offSet = fixture.Create<double>();
 
-            var result = srtDomain.IncludeOffsetOnSrtBlock(srtBlockEntities, offSet);
+            var result = _srtDomain.IncludeOffsetOnSrtBlock(srtBlockEntities, offSet);
 
             var tupleJoin = srtBlockEntities
                    .Join(result,
@@ -140,11 +144,32 @@ certificate of deposit, the bank just")]
             foreach (var (srtBlock, srtBlockOffset) in tupleJoin)
             {
                 Assert.AreEqual(srtBlock.Index, srtBlockOffset.Index);
-                Assert.AreEqual(srtBlock.Start.AddMilliseconds(offSet).TimeOfDay, srtBlockOffset.Start.TimeOfDay);
-                Assert.AreEqual(srtBlock.End.AddMilliseconds(offSet).TimeOfDay, srtBlockOffset.End.TimeOfDay);
+                Assert.AreEqual(_srtDomain.AddOffsetToSrtTime(srtBlock.Start, offSet).TimeOfDay, srtBlockOffset.Start.TimeOfDay);
+                Assert.AreEqual(_srtDomain.AddOffsetToSrtTime(srtBlock.End, offSet).TimeOfDay, srtBlockOffset.End.TimeOfDay);
                 Assert.AreEqual(srtBlock.Text.Count, srtBlockOffset.Text.Count);
             }
         }
 
+        [Test]
+        public void AddOffsetToSrtTimeValid()
+        {
+            DateTime time = _fixture.Create<DateTime>();
+            double offSet = _fixture.Create<double>();
+
+            DateTime timeOffset = _srtDomain.AddOffsetToSrtTime(time, offSet);
+
+            Assert.GreaterOrEqual(time, timeOffset);
+        }
+
+        [Test]
+        public void AddOffsetToSrtTimeWithNegativeValue()
+        {
+            DateTime time = _fixture.Create<DateTime>();
+            double offSet = -50000000;
+
+            DateTime timeOffset = _srtDomain.AddOffsetToSrtTime(time, offSet);
+
+            Assert.AreEqual(timeOffset.Date, timeOffset);
+        }
     }
 }
