@@ -12,5 +12,7 @@ namespace MindMiners.MiniProjeto.Domains.Srt
         Task<IReadOnlyList<SrtBlockEntity>> ConvertSrtToListEntityAsync(string srtText);
         IReadOnlyList<SrtBlockEntity> IncludeOffsetOnSrtBlock(IReadOnlyList<SrtBlockEntity> srtBlockEntities, double offset);
         string BuildSrtTextFromSrtBlock(IReadOnlyList<SrtBlockEntity> srtBlockEntitiesWithOffSet);
+
+        DateTime AddOffsetToSrtTime(DateTime dateTime, double offset);
     }
 }

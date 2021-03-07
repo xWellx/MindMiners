@@ -105,13 +105,25 @@ namespace MindMiners.MiniProjeto.Domains.Srt
             return listSrtItemEntity;
         }
 
+        public DateTime AddOffsetToSrtTime(DateTime dateTime, double offset)
+        {
+            var newTime = dateTime.AddMilliseconds(offset);
+            if (newTime.Date != dateTime.Date)
+            {
+                return newTime.Date;
+            }
+
+
+            return dateTime;
+        }
+
         public IReadOnlyList<SrtBlockEntity> IncludeOffsetOnSrtBlock(IReadOnlyList<SrtBlockEntity> srtBlockEntities, double offset)
         {
             return srtBlockEntities.Select(srtblock => new SrtBlockEntity()
             {
                 Index = srtblock.Index,
-                End = srtblock.End.AddMilliseconds(offset),
-                Start = srtblock.Start.AddMilliseconds(offset),
+                End = AddOffsetToSrtTime(srtblock.End, offset),
+                Start = AddOffsetToSrtTime(srtblock.Start, offset),
                 Text = srtblock.Text
             }).ToList();
         }
